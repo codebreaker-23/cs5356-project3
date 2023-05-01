@@ -1,0 +1,41 @@
+{
+  "name": "milestone-3-tmp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "lint-report": "eslint --output-file eslint-report.json --format json src/",
+    "lint-terminal": "eslint src/",
+    "lint": "npm run lint-report; npm run lint-terminal;"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "cookie-session": "^2.0.0",
+    "cors": "^2.8.5",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "express": "^4.18.2",
+    "firebase-admin": "^11.5.0",
+    "firebase-functions": "^4.2.0",
+    "jasmine": "^4.5.0",
+    "jasmine-console-reporter": "^3.1.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.20"
+  },
+  "devDependencies": {
+    "eslint": "^8.35.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-react": "^7.32.2",
+    "supertest": "^6.3.3"
+  }
+}

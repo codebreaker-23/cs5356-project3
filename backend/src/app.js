@@ -24,38 +24,41 @@ app.post("/api/userTest", (req, res) => {
    * Only this user should have access
    */
 
-  console.log("in app")
+  //console.log("in app")
 
   let testName = "testUser"
-  console.log(testName)
+  //console.log(testName)
   testName = testName +Math.round(Math.random()*100)
   console.log(testName)
 
   const space = db.createUserTest(testName)
 
-  console.log("Returned space:",space)
+  //console.log("Returned space:",space)
 
   if (!space){
     res.status(404).send({ message: "Space not created correctly" });
   } 
-  res.status(200).send({space});
+  res.status(200).send({testName});
 
 });
 
-app.post("/api/spaces/", (req, res) => {
+app.post("/api/spaces/", async (req, res) => {
   
   /**
    * CS-5356-TODO
-   * Create a Space Image
+   * Create a Space 
    *
    * 200 OK - with an object containing returned space object
    * 404 Not Found - ideally should not error
    *
    * Only this user should have access
+   * Expects {name: spaceName, stats:[1,2,3]}
    */
 
+  console.log("in API")
+  console.log("Body: ", req.body)
 
-  const space = db.createSpace(req.body.name)
+  const space = await db.createSpace(req.body.name,req.body.stats)
 
   if (!space){
     res.status(404).send({ message: "Space not created correctly" });
@@ -64,7 +67,31 @@ app.post("/api/spaces/", (req, res) => {
 
 });
 
-app.get("/api/spaces/:name/image", (req, res) => {
+app.get("/api/spaces/", async (req, res) => {
+  
+  /**
+   * CS-5356-TODO
+   * Return a list of all the spaces
+   *
+   * 200 OK - with an object containing returned space object
+   * 404 Not Found - ideally should not error
+   */
+
+  
+  console.log("IN API")
+
+  const spaces = await db.getSpaces()
+
+  console.log("Returned spaces:", spaces)
+
+  if (!spaces){
+    res.status(404).send({ message: "No spaces exist" });
+  } 
+  res.status(200).send({spaces});
+
+});
+
+app.get("/api/spaces/image", async (req, res) => {
   
   /**
    * CS-5356-TODO
@@ -76,18 +103,18 @@ app.get("/api/spaces/:name/image", (req, res) => {
    * Only this user should have access
    */
 
-  const {name} = req.params
+  const spaceName = req.body.name
 
-  const space = db.getSpaceImage(name)
+  const space = await db.getSpaceImage(spaceName)
 
   if (!space){
-    res.status(404).send({ message: "No class with this ID" });
+    res.status(404).send({ message: "No space with this name" });
   } 
   res.status(200).send({space});
 
 });
 
-app.get("/api/spaces/:name/opportunities", (req, res) => {
+app.get("/api/opportunities", async (req, res) => {
   
   /**
    * CS-5356-TODO
@@ -97,20 +124,35 @@ app.get("/api/spaces/:name/opportunities", (req, res) => {
    * 404 Not Found - when there is no class name associated
    *
    * Only this user should have access
+   * Expects name in the api call
+   * Returns an array of JSON objects of type
+     opportunities":{
+        "category": "Soldering",
+        "title": "Soldering",
+        "opportunity": "hello hello hello",
+        "description": "xxxx...,
+        "priority": "1",
+    }
+}
    */
 
-  const {name} = req.params
+  console.log("IN API")
+  
+  const spaceName = req.body.name
 
-  const space = db.getSpaceImage(name)
+  console.log("Space Name: ", spaceName)
 
-  if (!space){
+
+  const spaceOpps = await db.getSpaceOpportunities(spaceName)
+
+  if (!spaceOpps){
     res.status(404).send({ message: "No class with this ID" });
   } 
-  res.status(200).send({space});
+  res.status(200).send({spaceOpps});
 
 });
 
-app.post("api/spaces/:name/opportunities/add", (req, res) => {
+app.post("api/opportunities/add", async (req, res) => {
   /**
    * CS-5356-TODO
    * Create a new opportunity for a givenn space 
@@ -122,36 +164,46 @@ app.post("api/spaces/:name/opportunities/add", (req, res) => {
    * 404 Not Found - when there is no space associated
    *
    * Only this user should have access
+   * Expects body of type
+   * {
+        "category": "Soldering",
+        "title": "Soldering",
+        "opportunity": "hello hello hello",
+        "description": "xxxx...,
+        "priority": "1",
+    }
    */
+
+  console.log("IN API")
   
   const spaceName = req.body.name
 
-  // Change to the firestore login
-  if(spaceName && req.session.username){
-    // or user req.body and pass that instead
-    const newOpportunity = db.createSpaceOpp(spaceName,{category: req.body.category, title: req.body.title,opportunity: req.body.opportunity, description: req.body.description,priority:req.body.priority})
-    res.status(201).send(newOpportunity);
-  }
-  else{
-    // Channge to check for firestore
-    if(!req.session.username){
-      res.status(401).send({ message: "Unathorized user" });
-    }
-    if(!spaceName){
-      res.status(400).send({ message: "Request Body Missing" });
-    }
-    else{
-      res.status(401).send({ message: "Other error" });
-    }
-  }
-  
+  console.log("Space Name: ", spaceName)
 
-  res.status(501).send({ message: "Not implemented yet" });
+  // Change to the firestore login &
+  if(spaceName){
+    // or user req.body andc pass that instead
+    const newOpportunity = await db.createSpaceOpp(spaceName,
+      {
+        category: req.body.category,
+        title: req.body.title,
+        opportunity: req.body.opportunity, 
+        description: req.body.description,
+        priority:req.body.priority
+      })
+    
+  }
+
+  console.log("Space opp: ", newOpportunity)
   
+  if(!newOpportunity){
+      res.status(401).send({ message: "Error" });
+  }
+  res.status(201).send(newOpportunity);
 
 });
 
-app.get("/api/spaces/:name/analytics", (req, res) => {
+app.get("/api/spaces/:name/analytics", async (req, res) => {
   
   /**
    * CS-5356-TODO
@@ -165,7 +217,7 @@ app.get("/api/spaces/:name/analytics", (req, res) => {
 
   const {name} = req.params
 
-  const space = db.getSpaceImage(name)
+  const space = await db.getAnalytics(name)
 
   if (!space){
     res.status(404).send({ message: "No class with this ID" });
@@ -175,7 +227,7 @@ app.get("/api/spaces/:name/analytics", (req, res) => {
 });
 
   
-app.post("/api/spaces/:name/opportunities/remove/:oppName", (req, res) => {
+app.post("/api/spaces/:name/opportunities/remove/:oppName", async (req, res) => {
   /**
    * CS-5356-TODO
    * Dismiss the the associated opportunity
@@ -188,16 +240,12 @@ app.post("/api/spaces/:name/opportunities/remove/:oppName", (req, res) => {
    *
    * Users should only see their own opportunities and  be able to dismiss them 
    */
-  if(!req.session.username){
-    res.status(401).send({ message: "Unathorized user" });
-  }
 
-  let userClasses = db.getClasses(req.session.username)
-
-  if(!userClasses){
-    userClasses = []
-  }
-  res.status(200).send({classes: userClasses});
+  let dismissedOpp = await db.dismissOpportunity(req.params.oppName)
+   if (!dismissedOpp){
+    console.log("ERROR")
+   }
+  res.status(200).send(dismissedOpp);
 });
 
 app.get("/", (request, response) => {

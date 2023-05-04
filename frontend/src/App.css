@@ -28,6 +28,81 @@
   color: #61dafb;
 }
 
+.navbar {
+  display: flex;
+  justify-content: space-evenly;
+  width: 50%;
+  margin: 0 auto;
+}
+
+.nav-item {
+  text-decoration: none;
+}
+
+.tab {
+  color: #fff;
+  font-size: 20px;
+  padding: 10px 20px;
+  border-radius: 30px;
+}
+
+.tab1 {
+  background-color: #dd9fc7;
+}
+
+.tab2 {
+  background-color: #28a745;
+}
+
+.tab3 {
+  background-color: #ffc107;
+}
+
+.tab4 {
+  background-color: #61dafb;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.border {
+  border-top: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+
+.section {
+  margin-right: 20px;
+}
+
+.signout {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  height: 30%;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 5px;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

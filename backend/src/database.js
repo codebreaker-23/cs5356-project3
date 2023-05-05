@@ -2,7 +2,7 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import 'firebase/compat/auth'
-import { getStorage, ref } from "firebase/storage";
+import { getStorage, ref, getDownloadURL  } from "firebase/storage";
 import { query, where } from "firebase/firestore"; 
 
 // CS5356 TO-DO #0 Add your Firebase Config
@@ -33,12 +33,9 @@ export const createUserTest = async (spaceName) => {
 
 export const getImageFileName = async (spaceName,spaceUser) => {
   try {
-    const spaceDoc = getSpace(spaceName,spaceUser)
-    if (!spaceDoc.exists) {
-      throw new Error("No space found with that name");
-    }
-    const spaceData = spaceDoc.data();
-    return spaceData.img;
+    console.log("getting file name for: ", spaceName)
+    const spaceDoc = await getSpace(spaceName,spaceUser)
+    return spaceDoc.img
   } catch (error) {
     console.error("Error getting analytics: ", error);
     throw error;
@@ -48,22 +45,24 @@ export const getImageFileName = async (spaceName,spaceUser) => {
 // CS5356 TO-DO #1
 export const getSpaceImage = async (spaceName,spaceUser) => {
   // Get the image of a given space name
-  const storage = getStorage();
+  let storage = getStorage()
 
-  // get Image String using fire store
 
-  const imagesRef = ref(storageRef, 'images');
+  const fileName = await getImageFileName(spaceName,spaceUser)
 
-  const fileName = getImageFileName(spaceName,spaceUser)
+  console.log("file name: ", fileName)
 
-  // Child references can also take paths delimited by '/'
+  const imagesRef = ref(storage, 'images');
   const spaceRef = ref(imagesRef, fileName);
 
-  // File path is 'images/space.jpg'
-  const path = spaceRef.fullPath;
+  console.log("spaceRef: ", spaceRef)
 
-  // File name is 'space.jpg'
-  const name = spaceRef.name;
+  // Get the download URL of the image
+  const url = await getDownloadURL(spaceRef);
+
+  console.log("URL: ", url)
+
+  return url;
 };
 
 // CS5356 TO-DO #1.5

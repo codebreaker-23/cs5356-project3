@@ -141,12 +141,12 @@ app.get("/api/spaces/image", async (req, res) => {
 
   const user = "testUser"
 
-  const space = await db.getSpaceImage(spaceName,user)
+  const image = await db.getSpaceImage(spaceName,user)
 
-  if (!space){
+  if (!image){
     res.status(404).send({ message: "No space with this name" });
   } 
-  res.status(200).send({space});
+  res.status(200).send({image});
 
 } catch (error) {
   console.error("Error getting image: ", error);

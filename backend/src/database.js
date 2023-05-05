@@ -88,7 +88,7 @@ export const createSpace = async (spaceName, spaceStats,spaceUser) => {
     const newSpace = {
       name: spaceName,
       username: spaceUser,
-      img: [],
+      img: "",
       opportunities: [],
       analytics: {
         heatmap: null,

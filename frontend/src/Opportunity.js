@@ -26,7 +26,7 @@ const Opportunity = () => {
         if(res.ok){
           res.json().then(data => {
             console.log(data)
-            setOpportunities(data);
+            setOpportunities(data,user);
           });
         }else{
           console.log('error in fetching opportunities');
@@ -68,7 +68,20 @@ const Opportunity = () => {
   }
   const onLoad = () => {
     getOpportunities();
+    console.log(opportunities);
   };
+
+  const items = ()=>{
+    if(opportunities && opportunities.spaceOpps.length > 0)
+    opportunities.spaceOpps.map(item => (
+    <li>
+      <span>{item.category}</span>
+      <span>{item.title}</span>
+      <span>{item.description}</span>
+      <span>{item.priority}</span>
+      <span><button onClick={handleDismiss(item.title)}>Dismiss</button></span>
+    </li>
+  ));
 
   const handleDismiss = (opportunity) => {
     fetch(host+'/api/spaces/' +  'test' + '/opportunities/remove/' + opportunity, {
@@ -94,16 +107,7 @@ const Opportunity = () => {
         <div className="container">
           <h1>List of Opportunities</h1>
           <ul>
-            {opportunities.spaceOpps.map((values, index) => {
-              return(
-              <li key={index}>
-                {values}
-                <div style={{ marginLeft: “auto” }}>
-                  <button className=“button is-danger” onClick={handleDismiss(object.opportunity)}>Dismiss</button>
-                </div>
-              </li>
-            );
-            })}
+            {items}
           </ul>
         </div>
       </section>

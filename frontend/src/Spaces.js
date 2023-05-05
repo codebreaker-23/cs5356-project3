@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import "./App.css"; //central css file
+import "./App.css";
 
 import table from './assets/Image 5-4-23 at 3.45 PM.jpeg';
 
@@ -16,7 +16,7 @@ const Spaces = () => {
                     3D Model
                 </h5>
             </div>
-            <div class = "center" style={{display: "block", width: "50%", marginLeft:"auto", marginRight: "auto"}} >  
+            <div className = "center" style={{display: "block", width: "50%", marginLeft:"auto", marginRight: "auto"}} >  
                 <img src={table} alt="Table" style={{ width: 425, height: 500}} />
             </div>
         </div>

@@ -1,6 +1,9 @@
 
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
+import 'firebase/compat/auth'
+import { getStorage, ref } from "firebase/storage";
+import { query, where } from "firebase/firestore"; 
 
 // CS5356 TO-DO #0 Add your Firebase Config
 const config = {
@@ -9,13 +12,16 @@ const config = {
   projectId: "milestone3-a3b64",
   storageBucket: "milestone3-a3b64.appspot.com",
   messagingSenderId: "348626529212",
-  appId: "1:348626529212:web:fbde8392d60013be4319b9"
+  appId: "1:348626529212:web:fbde8392d60013be4319b9",
+  storageBucket: 'milestone3-a3b64.appspot.com'
 };
 
-// CS5356 TO-DO #0 Uncomment these 2 lines after
-//   adding your Firebase Config
+// CS5356 TO-DO #0 
  firebase.initializeApp(config);
  const firestoreDb = firebase.firestore();
+
+ const spacesRef = firestoreDb.collection('spaces');
+
 
 // CS5356 TO-DO #0
 export const createUserTest = async (spaceName) => {
@@ -25,20 +31,65 @@ export const createUserTest = async (spaceName) => {
   return {name: spaceName}
 };
 
+export const getImageFileName = async (spaceName,spaceUser) => {
+  try {
+    const spaceDoc = getSpace(spaceName,spaceUser)
+    if (!spaceDoc.exists) {
+      throw new Error("No space found with that name");
+    }
+    const spaceData = spaceDoc.data();
+    return spaceData.img;
+  } catch (error) {
+    console.error("Error getting analytics: ", error);
+    throw error;
+  }
+};
+
 // CS5356 TO-DO #1
-export const getSpaceImage = async (spaceName,spaceStats) => {
+export const getSpaceImage = async (spaceName,spaceUser) => {
   // Get the image of a given space name
+  const storage = getStorage();
+
+  // get Image String using fire store
+
+  const imagesRef = ref(storageRef, 'images');
+
+  const fileName = getImageFileName(spaceName,spaceUser)
+
+  // Child references can also take paths delimited by '/'
+  const spaceRef = ref(imagesRef, fileName);
+
+  // File path is 'images/space.jpg'
+  const path = spaceRef.fullPath;
+
+  // File name is 'space.jpg'
+  const name = spaceRef.name;
+};
+
+// CS5356 TO-DO #1.5
+export const setSpaceImage = async (spaceName,spaceImageName,spaceImageFile,spaceUser) => {
+  // Get the image of a given space name
+  const storage = getStorage();
+
+  
+  const mountainImagesRef = ref(storage, 'images/mountains.jpg');
+
+  // 'file' comes from the Blob or File API
+  uploadBytes(storageRef, file).then((snapshot) => {
+    console.log('Uploaded a blob or file!');
+  });
 };
 
 // CS5356 TO-DO #2
-export const createSpace = async (spaceName, spaceStats) => {
+export const createSpace = async (spaceName, spaceStats,spaceUser) => {
+
   try {
-    console.log("in DB")
+    //console.log("in DB", firestoreDb.collection("spaces").doc(spaceName))
     const spaceRef = firestoreDb.collection("spaces").doc(spaceName);
     const newSpace = {
       name: spaceName,
-      //usernname: firebase.auth().currentUser.uid
-      img: null,
+      username: spaceUser,
+      img: [],
       opportunities: [],
       analytics: {
         heatmap: null,
@@ -55,12 +106,12 @@ export const createSpace = async (spaceName, spaceStats) => {
 };
 
 // CS5356 TO-DO #2.5
-export const getSpaces = async () => {
+export const getSpaces = async (spaceUser) => {
 
 
   console.log("IN DB")
-  //const querySnapshot = await firestoreDb.collection("spaces").where("username","==",firebase.auth().currentUser.uid).get()
-  const querySnapshot = await firestoreDb.collection("spaces").get();
+  const querySnapshot = await spacesRef.where("username","==",spaceUser).get();
+  //const querySnapshot = await firestoreDb.collection("spaces").get();
   console.log("querySnapshot: ",querySnapshot)
   let results = []
   querySnapshot.forEach((doc)=> {
@@ -70,47 +121,71 @@ export const getSpaces = async () => {
           ...doc.data()
         });
       });
-  console.log("Results: ",results)
+  //console.log("Results: ",results)
   return results
   // Create a new space with the given Name
 };
 
+export const getSpace = async (spaceName,spaceUser) => {
+  console.log("Space User: ", spaceUser)
+  console.log("Space User: ", spaceName)
+  const space = await spacesRef.where('username', '==', spaceUser).where('name', '==', spaceName).get();
+  console.log("Space: ", space)
+  let results = []
+  space.forEach((doc)=> {
+    results.push(
+      {
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+  return results[0]
+  //console.log("Results: ",results)
+
+    
+
+  // Get the opportunities of a given space name
+};
+
 // CS5356 TO-DO #3
-export const getSpaceOpportunities = async (spaceName) => {
-  const spaces = await getSpaces()
-  console.log("In DB, Space: ", spaces)
-  for (let i =0; i < spaces.length; i++){
-      if (spaces[i].name == spaceName){
-        console.log(spaces[i])
-        return spaces[i].opportunities
-      }
-  }
+export const getSpaceOpportunities = async (spaceName,spaceUser) => {
+  const spaces = await getSpace(spaceName,spaceUser)
+  console.log("Space: ", spaces)
+  
+  return spaces.opportunities
 
   // Get the opportunities of a given space name
 };
 
 // CS5356 TO-DO #4
-export const createSpaceOpp = async (spaceName, opportunity) => {
-  console.log("IN DB")
+export const createSpaceOpp = async (spaceName, opportunity,spaceUser) => {
+  //console.log("IN DB")
   try {
-    const spaceRef = firestoreDb.collection("spaces").doc(spaceName);
-    const spaceDoc = await spaceRef.get();
-    //console.log("spaceDoc: ", spaceDoc)
+    let spaceQuery = spacesRef.where('username', '==', spaceUser).where('name', '==', spaceName);
+    const querySnapshot = await spaceQuery.get();
+
+    if (querySnapshot.empty) {
+      throw new Error("No space found with that name");
+    }
+
+    let spaceDoc;
+    querySnapshot.forEach(doc => {
+      spaceDoc = doc;
+    });
     if (!spaceDoc.exists) {
       throw new Error("No space found with that name");
     }
     const spaceData = spaceDoc.data();
-    //console.log("Space Data: ", spaceData)
+    console.log("spaceData: ", spaceData)
     const newOpportunity = {
       category: opportunity.category,
       title: opportunity.title,
-      opportunity: opportunity.opportunity,
       description: opportunity.description,
       priority: opportunity.priority
     };
     const updatedOpportunities = [...spaceData.opportunities, newOpportunity];
     //console.log("Updated opps: ", updatedOpportunities)
-    await spaceRef.update({ opportunities: updatedOpportunities });
+    await spaceDoc.ref.update({ opportunities: updatedOpportunities });
     return newOpportunity;
   } catch (error) {
     console.error("Error adding opportunity: ", error);
@@ -118,17 +193,43 @@ export const createSpaceOpp = async (spaceName, opportunity) => {
   }
 };
 
-
-// CS5356 TO-DO #5
-export const getAnalytics = async (spaceName) => {
+export const setAnalytics = async (spaceName, heatmap, stats,spaceUser) => {
   try {
-    const spaceRef = firestoreDb.collection("spaces").doc(spaceName);
-    const spaceDoc = await spaceRef.get();
+    let spaceQuery = spacesRef.where('username', '==', spaceUser).where('name', '==', spaceName);
+    const querySnapshot = await spaceQuery.get();
+
+    if (querySnapshot.empty) {
+      throw new Error("No space found with that name");
+    }
+
+    let spaceDoc;
+    querySnapshot.forEach(doc => {
+      spaceDoc = doc;
+    });
     if (!spaceDoc.exists) {
       throw new Error("No space found with that name");
     }
-    const spaceData = spaceDoc.data();
-    return spaceData.analytics;
+
+    const updatedAnalytics = {
+      heatmap: heatmap,
+      stats: stats,
+    };
+
+    await spaceDoc.ref.update({ analytics: updatedAnalytics });
+
+    return updatedAnalytics;
+  } catch (error) {
+    console.error("Error setting analytics: ", error);
+    throw error;
+  }
+};
+
+
+// CS5356 TO-DO #5
+export const getAnalytics = async (spaceName,spaceUser) => {
+  try {
+    const spaceRef = await getSpace(spaceName,spaceUser)
+    return spaceRef.analytics;
   } catch (error) {
     console.error("Error getting analytics: ", error);
     throw error;
@@ -136,13 +237,41 @@ export const getAnalytics = async (spaceName) => {
 };
 
 // CS5356 TO-DO #6
-export const dismissOpportunity = async (spaceName,title) => {
+export const dismissOpportunity = async (spaceName,oppTitle,spaceUser) => {
   try {
-    const spaceRef = firestoreDb.collection("spaces").doc(spaceName);
-    await spaceRef.delete();
+    let spaceQuery = spacesRef.where('username', '==', spaceUser).where('name', '==', spaceName);
+    const querySnapshot = await spaceQuery.get();
+
+    if (querySnapshot.empty) {
+      throw new Error("No space found with that name");
+    }
+
+    let spaceDoc;
+    querySnapshot.forEach(doc => {
+      spaceDoc = doc;
+    });
+    if (!spaceDoc.exists) {
+      throw new Error("No space found with that name");
+    }
+    const spaceData = spaceDoc.data();
+    //console.log("Space data: ", spaceData)
+    //console.log("Space data opportunities: ", spaceData.opportunities)
+
+    let updatedOpportunities = []
+
+    updatedOpportunities = spaceData.opportunities.filter((opp) => opp.title !== oppTitle);
+
+    //console.log("Updated Opportunities: ", updatedOpportunities)
+
+    await spaceDoc.ref.update({ opportunities: updatedOpportunities });
+    return true;
   } catch (error) {
-    console.error("Error dismissing opportunity: ", error);
+    console.error("Error deleting opportunity: ", error);
     throw error;
   }
-
 };
+
+
+
+
+

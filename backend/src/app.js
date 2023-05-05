@@ -27,18 +27,15 @@ app.post("/api/userTest", (req, res) => {
   //console.log("in app")
 
   let testName = "testUser"
-  //console.log(testName)
   testName = testName +Math.round(Math.random()*100)
-  console.log(testName)
 
   const space = db.createUserTest(testName)
-
-  //console.log("Returned space:",space)
 
   if (!space){
     res.status(404).send({ message: "Space not created correctly" });
   } 
   res.status(200).send({testName});
+
 
 });
 
@@ -55,15 +52,24 @@ app.post("/api/spaces/", async (req, res) => {
    * Expects {name: spaceName, stats:[1,2,3]}
    */
 
-  console.log("in API")
-  console.log("Body: ", req.body)
+  //console.log("in API")
+  //console.log("Body: ", req.body)
 
-  const space = await db.createSpace(req.body.name,req.body.stats)
+  try {
+
+  const user = "testUser"
+
+  const space = await db.createSpace(req.body.name,req.body.stats,user)
 
   if (!space){
     res.status(404).send({ message: "Space not created correctly" });
   } 
   res.status(200).send({space});
+
+} catch (error) {
+  console.error("Error getting image: ", error);
+  res.status(500).send({ message: "Server error" });
+}
 
 });
 
@@ -80,16 +86,44 @@ app.get("/api/spaces/", async (req, res) => {
   
   console.log("IN API")
 
-  const spaces = await db.getSpaces()
+  try {
 
-  console.log("Returned spaces:", spaces)
+  const user = "testUser"
+  const spaces = await db.getSpaces(user)
+
+  //console.log("Returned spaces:", spaces)
 
   if (!spaces){
     res.status(404).send({ message: "No spaces exist" });
   } 
   res.status(200).send({spaces});
 
+} catch (error) {
+  console.error("Error getting image: ", error);
+  res.status(500).send({ message: "Server error" });
+}
+
 });
+
+
+// app.get("/api/user", async (req, res) => {
+//   const { uid } = req.user;
+
+//   try {
+//     const userRecord = await admin.auth().getUser(uid);
+//     const userData = {
+//       uid: userRecord.uid,
+//       email: userRecord.email,
+//       displayName: userRecord.displayName,
+//       photoURL: userRecord.photoURL,
+//     };
+//     console.log("Successfully passed the User back: ", userData)
+//     res.status(200).send(userData);
+//   } catch (error) {
+//     console.error("Error fetching user data:", error);
+//     res.status(500).send({ message: "Error fetching user data" });
+//   }
+// });
 
 app.get("/api/spaces/image", async (req, res) => {
   
@@ -102,15 +136,55 @@ app.get("/api/spaces/image", async (req, res) => {
    *
    * Only this user should have access
    */
-
+  try {
   const spaceName = req.body.name
 
-  const space = await db.getSpaceImage(spaceName)
+  const user = "testUser"
+
+  const space = await db.getSpaceImage(spaceName,user)
 
   if (!space){
     res.status(404).send({ message: "No space with this name" });
   } 
   res.status(200).send({space});
+
+} catch (error) {
+  console.error("Error getting image: ", error);
+  res.status(500).send({ message: "Server error" });
+}
+
+});
+
+app.set("/api/spaces/image", async (req, res) => {
+  
+  /**
+   * CS-5356-TODO
+   * Get a Space Image
+   *
+   * 200 OK - with an object containing the image for that space
+   * 404 Not Found - when there is no class image found
+   *
+   * Only this user should have access
+   * 
+   * Epects: { name: spaceName
+   *           image: spaceImage }
+   */
+  try {
+  const spaceName = req.body.name
+  const spaceImage = req.body.image
+
+  const user = "testUser"
+
+  const space = await db.setSpaceImage(spaceName,spaceImage,user)
+
+  if (!space){
+    res.status(404).send({ message: "No space with this name" });
+  } 
+  res.status(200).send({space});
+} catch (error) {
+  console.error("Error setting image: ", error);
+  res.status(500).send({ message: "Server error" });
+}
 
 });
 
@@ -136,23 +210,31 @@ app.get("/api/opportunities", async (req, res) => {
 }
    */
 
-  console.log("IN API")
+  //console.log("IN API")
+
+  try {
   
   const spaceName = req.body.name
+  const user = "testUser"
 
-  console.log("Space Name: ", spaceName)
+  //console.log("Space Name: ", spaceName)
+  const spaceOpps = await db.getSpaceOpportunities(spaceName,user)
 
-
-  const spaceOpps = await db.getSpaceOpportunities(spaceName)
+  console.log("spaceOpps: ",spaceOpps)
 
   if (!spaceOpps){
     res.status(404).send({ message: "No class with this ID" });
   } 
   res.status(200).send({spaceOpps});
 
+} catch (error) {
+  console.error("Error getting opportunities: ", error);
+  res.status(500).send({ message: "Server error" });
+}
+
 });
 
-app.post("api/opportunities/add", async (req, res) => {
+app.post("/api/opportunities/add", async (req, res) => {
   /**
    * CS-5356-TODO
    * Create a new opportunity for a givenn space 
@@ -174,36 +256,45 @@ app.post("api/opportunities/add", async (req, res) => {
     }
    */
 
-  console.log("IN API")
+  //console.log("IN API")
+
+  try {
+
+  const user = "testUser"
   
   const spaceName = req.body.name
 
-  console.log("Space Name: ", spaceName)
+  //console.log("Space Name: ", spaceName)
+
+  if(!spaceName){
+    res.status(401).send({ message: "Error passing in name" });
+  }
 
   // Change to the firestore login &
-  if(spaceName){
     // or user req.body andc pass that instead
-    const newOpportunity = await db.createSpaceOpp(spaceName,
-      {
-        category: req.body.category,
-        title: req.body.title,
-        opportunity: req.body.opportunity, 
-        description: req.body.description,
-        priority:req.body.priority
-      })
-    
-  }
+  const newOpportunity = await db.createSpaceOpp(spaceName,
+    {
+      category: req.body.category,
+      title: req.body.title,
+      description: req.body.description,
+      priority:req.body.priority
+    },user)
 
-  console.log("Space opp: ", newOpportunity)
-  
+  //console.log("Space opp: ", newOpportunity)
+
   if(!newOpportunity){
-      res.status(401).send({ message: "Error" });
+    res.status(401).send({ message: "Error setting new opportunity" });
   }
+  
   res.status(201).send(newOpportunity);
+} catch (error) {
+  console.error("Error adding opportunity: ", error);
+  res.status(500).send({ message: "Server error" });
+}
 
 });
 
-app.get("/api/spaces/:name/analytics", async (req, res) => {
+app.get("/api/spaces/analytics", async (req, res) => {
   
   /**
    * CS-5356-TODO
@@ -215,41 +306,81 @@ app.get("/api/spaces/:name/analytics", async (req, res) => {
    * Only this user should have access
    */
 
-  const {name} = req.params
+  try {
+  const spaceName = req.body.name
+  const user = "testUser"
+  //console.log("IN API, spaceName: ", spaceName)
 
-  const space = await db.getAnalytics(name)
+  const space = await db.getAnalytics(spaceName,user)
 
   if (!space){
-    res.status(404).send({ message: "No class with this ID" });
+    res.status(404).send({ message: "No space with this name" });
   } 
-  res.status(200).send({space});
+  res.status(200).send(space);
+  } catch (error) {
+    console.error("Error setting analytics: ", error);
+    res.status(500).send({ message: "Server error" });
+    }
 
 });
 
-  
-app.post("/api/spaces/:name/opportunities/remove/:oppName", async (req, res) => {
+app.post("/api/spaces/analytics", async (req, res) => {
   /**
    * CS-5356-TODO
-   * Dismiss the the associated opportunity
+   * Set a Space's associated analytics
    *
-   * Using firestore, find the associated opportunity list and delte the item with the associated title
+   * 200 OK - with an object containing the updated analytics object
+   * 404 Not Found - when there is no space name associated
    *
-   * Return:
-   * 200 OK - if successfuly deleted
-   * 401 Unauthorized - when there is no space or opportunity found
-   *
-   * Users should only see their own opportunities and  be able to dismiss them 
+   * Only this user should have access
+   * Expects body of type:
+   * {
+        "heatmap": "heatmap",
+        "stats": [1, 2, 3]
+     }
    */
+  try {
+    const {name,heatmap, stats } = req.body;
+    const user = "testUser"
+    const analytics = await db.setAnalytics(name, heatmap, stats,user);
 
-  let dismissedOpp = await db.dismissOpportunity(req.params.oppName)
-   if (!dismissedOpp){
-    console.log("ERROR")
-   }
-  res.status(200).send(dismissedOpp);
+    if (!analytics) {
+      res.status(404).send({ message: "No space found with that name" });
+    }
+
+    res.status(200).send(analytics);
+  } catch (error) {
+    console.error("Error setting analytics: ", error);
+    res.status(500).send({ message: "Server error" });
+  }
 });
 
-app.get("/", (request, response) => {
-  res.send("Hello world");
+
+  
+app.delete("/api/spaces/opportunities", async (req, res) => {
+  /**
+   * CS-5356-TODO
+   * Delete the associated opportunity
+   *
+   * Using firestore, find the associated opportunity list and delete the item with the associated title
+   *
+   * Return:
+   * 200 OK - if successfully deleted
+   * 404 Not Found - when there is no space or opportunity found
+   *
+   * Users should only see their own opportunities and be able to delete them
+   */
+
+  const { name, title } = req.body;
+  const user = "testUser"
+
+  const success = await db.dismissOpportunity(name, title,user);
+
+  if (success) {
+    res.status(200).send({ message: "Opportunity successfully deleted" });
+  } else {
+    res.status(404).send({ message: "No space or opportunity found" });
+  }
 });
 
 export default app;

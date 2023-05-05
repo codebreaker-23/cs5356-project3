@@ -83,7 +83,7 @@ export const setSpaceImage = async (spaceName,spaceImageName,spaceImageFile,spac
 export const createSpace = async (spaceName, spaceStats,spaceUser) => {
 
   try {
-    //console.log("in DB", firestoreDb.collection("spaces").doc(spaceName))
+    console.log("in DB", firestoreDb.collection("spaces").doc(spaceName))
     const spaceRef = firestoreDb.collection("spaces").doc(spaceName);
     const newSpace = {
       name: spaceName,
@@ -183,7 +183,7 @@ export const createSpaceOpp = async (spaceName, opportunity,spaceUser) => {
       priority: opportunity.priority
     };
     const updatedOpportunities = [...spaceData.opportunities, newOpportunity];
-    //console.log("Updated opps: ", updatedOpportunities)
+    console.log("Updated opps: ", updatedOpportunities)
     await spaceDoc.ref.update({ opportunities: updatedOpportunities });
     return newOpportunity;
   } catch (error) {

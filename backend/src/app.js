@@ -1,9 +1,13 @@
 /* eslint-disable node/no-unsupported-features/es-syntax */
 import express from "express";
+import cors from "cors";
 import bodyParser from "body-parser";
 import * as db from "./database.js";
 
+
 const app = express();
+app.use(cors());
+
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
@@ -137,7 +141,7 @@ app.get("/api/spaces/image", async (req, res) => {
    * Only this user should have access
    */
   try {
-  const spaceName = req.body.name
+  const spaceName = 'TestMaker Lab' //req.body.name
 
   const user = "testUser"
 
@@ -172,6 +176,8 @@ app.set("/api/spaces/image", async (req, res) => {
   try {
   const spaceName = req.body.name
   const spaceImage = req.body.image
+
+  //const {user} = req.params
 
   const user = "testUser"
 
@@ -213,8 +219,7 @@ app.get("/api/opportunities", async (req, res) => {
   //console.log("IN API")
 
   try {
-  
-  const spaceName = req.body.name
+  const spaceName = 'TestMaker Lab' // req.body.name
   const user = "testUser"
 
   //console.log("Space Name: ", spaceName)
@@ -280,13 +285,16 @@ app.post("/api/opportunities/add", async (req, res) => {
       priority:req.body.priority
     },user)
 
-  //console.log("Space opp: ", newOpportunity)
+  console.log("Space opp: ", newOpportunity)
 
   if(!newOpportunity){
     res.status(401).send({ message: "Error setting new opportunity" });
   }
+
+  console.log("Space opp: ", newOpportunity)
   
   res.status(201).send(newOpportunity);
+  console.log("Space opp: ", newOpportunity)
 } catch (error) {
   console.error("Error adding opportunity: ", error);
   res.status(500).send({ message: "Server error" });

@@ -14,6 +14,8 @@ const Opportunity = () => {
 //     "priority": "1",
 // }}
 
+  const user = "testUser"
+
   const getOpportunities = () => {
     console.log('inside getOpportunities');
 
@@ -92,13 +94,13 @@ const Opportunity = () => {
         <div className="container">
           <h1>List of Opportunities</h1>
           <ul>
-            {opportunities.spaceOpps.map((object, index) => {
+            {opportunities.spaceOpps.map((values, index) => {
               return(
               <li key={index}>
-                {object}
-                <div style={{ marginLeft: "auto" }}>
-                  <button className="button is-danger" onClick={handleDismiss(object.opportunity)}>Dismiss</button>
-                </div>              
+                {values}
+                <div style={{ marginLeft: “auto” }}>
+                  <button className=“button is-danger” onClick={handleDismiss(object.opportunity)}>Dismiss</button>
+                </div>
               </li>
             );
             })}

@@ -60,10 +60,7 @@ app.post("/api/spaces/", async (req, res) => {
   //console.log("Body: ", req.body)
 
   try {
-
-  const user = "testUser"
-
-  const space = await db.createSpace(req.body.name,req.body.stats,user)
+  const space = await db.createSpace(req.body.name,req.body.stats,req.body.userName)
 
   if (!space){
     res.status(404).send({ message: "Space not created correctly" });
@@ -77,25 +74,20 @@ app.post("/api/spaces/", async (req, res) => {
 
 });
 
-app.get("/api/spaces/", async (req, res) => {
-  
-  /**
-   * CS-5356-TODO
-   * Return a list of all the spaces
-   *
-   * 200 OK - with an object containing returned space object
-   * 404 Not Found - ideally should not error
-   */
+app.get("/api/spaces/:userName", async (req, res) => {  /**
+* CS-5356-TODO
+* Return a list of all the spaces
+*
+* 200 OK - with an object containing returned space object
+* 404 Not Found - ideally should not error
+*/
 
-  
-  console.log("IN API")
-
+console.log("IN spaces get API")
   try {
+  const userName = req.params.userName;
+  const spaces = await db.getSpaces(userName)
 
-  const user = "testUser"
-  const spaces = await db.getSpaces(user)
-
-  //console.log("Returned spaces:", spaces)
+  console.log("Returned spaces:", spaces)
 
   if (!spaces){
     res.status(404).send({ message: "No spaces exist" });
@@ -194,7 +186,7 @@ app.set("/api/spaces/image", async (req, res) => {
 
 });
 
-app.get("/api/opportunities", async (req, res) => {
+app.get("/api/opportunities/user/:userName/space/:spaceName", async (req, res) => {
   
   /**
    * CS-5356-TODO
@@ -219,23 +211,22 @@ app.get("/api/opportunities", async (req, res) => {
   //console.log("IN API")
 
   try {
-  const spaceName = 'TestMaker Lab' // req.body.name
-  const user = "testUser"
+    const { userName, spaceName } = req.params;
+    // const user = req.params.user;
+    console.log("Params: ", userName, spaceName)
+    const spaceOpps = await db.getSpaceOpportunities(spaceName, userName);
 
-  //console.log("Space Name: ", spaceName)
-  const spaceOpps = await db.getSpaceOpportunities(spaceName,user)
+    console.log("spaceOpps: ", spaceOpps);
 
-  console.log("spaceOpps: ",spaceOpps)
-
-  if (!spaceOpps){
-    res.status(404).send({ message: "No class with this ID" });
-  } 
+    if (!spaceOpps) {
+      res.status(404).send({ message: "No class with this ID" });
+    }
   res.status(200).send({spaceOpps});
 
-} catch (error) {
-  console.error("Error getting opportunities: ", error);
-  res.status(500).send({ message: "Server error" });
-}
+  } catch (error) {
+    console.error("Error getting opportunities: ", error);
+    res.status(500).send({ message: "Server error" });
+  }
 
 });
 
@@ -261,14 +252,14 @@ app.post("/api/opportunities/add", async (req, res) => {
     }
    */
 
-  //console.log("IN API")
+  //console.log("IN Opportunities Add API")
 
   try {
 
-  const user = "testUser"
+  const user = req.body.username;
+  const spaceName = req.body.name;
   
-  const spaceName = req.body.name
-
+  // const spaceName = req.body.name
   //console.log("Space Name: ", spaceName)
 
   if(!spaceName){

@@ -112,7 +112,7 @@ export const getSpaces = async (spaceUser) => {
   console.log("IN DB")
   const querySnapshot = await spacesRef.where("username","==",spaceUser).get();
   //const querySnapshot = await firestoreDb.collection("spaces").get();
-  console.log("querySnapshot: ",querySnapshot)
+  // console.log("querySnapshot: ",querySnapshot)
   let results = []
   querySnapshot.forEach((doc)=> {
     results.push(
@@ -121,7 +121,7 @@ export const getSpaces = async (spaceUser) => {
           ...doc.data()
         });
       });
-  //console.log("Results: ",results)
+  // console.log("Results spaces: ",results)
   return results
   // Create a new space with the given Name
 };
@@ -185,7 +185,10 @@ export const createSpaceOpp = async (spaceName, opportunity,spaceUser) => {
     };
     const updatedOpportunities = [...spaceData.opportunities, newOpportunity];
     console.log("Updated opps: ", updatedOpportunities)
+    
+    //TODO 
     await spaceDoc.ref.update({ opportunities: updatedOpportunities });
+
     return newOpportunity;
   } catch (error) {
     console.error("Error adding opportunity: ", error);

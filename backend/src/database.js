@@ -35,6 +35,7 @@ export const getImageFileName = async (spaceName,spaceUser) => {
   try {
     console.log("getting file name for: ", spaceName)
     const spaceDoc = await getSpace(spaceName,spaceUser)
+    console.log("img: ", spaceDoc.img)
     return spaceDoc.img
   } catch (error) {
     console.error("Error getting analytics: ", error);
@@ -88,7 +89,7 @@ export const createSpace = async (spaceName, spaceStats,spaceUser) => {
     const newSpace = {
       name: spaceName,
       username: spaceUser,
-      img: "",
+      img: "img.png",
       opportunities: [],
       analytics: {
         heatmap: null,

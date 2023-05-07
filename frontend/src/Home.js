@@ -1,15 +1,28 @@
 import React from "react";
 import firebase from "firebase/compat/app";
-import { Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import "./App.css";
 
-const Home = () => {        
+const Home = () => {
+
+    const userDetails = (user = firebase.auth().currentUser) => {
+        console.log(user);
+        if (user) {
+            return ({
+                "uid": user.uid,
+                "displayName": user.displayName,
+                "email": user.email
+            });
+        } else {
+            return null;
+        }
+    }
+
     return (
         <div>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "20vh" }}>
-                <h1>Welcome</h1>
-                {/* TODO insert user name */}
+                <h1>Welcome {userDetails() ? userDetails().displayName : ""}</h1>
             </div>
             <div className="navbar">
                 <Link to="/spaces" className="nav-item">
@@ -47,7 +60,3 @@ const Home = () => {
 };
 
 export default Home;
-
-//things to make sure work here. 
-// InstructorHome page js can used to create each page for componets of this page. 
-// 

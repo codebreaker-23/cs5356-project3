@@ -1,32 +1,35 @@
 import React, { useState, useEffect } from "react"
+import firebase from "firebase/compat/app";
 import "./App.css";
 
 const Opportunity = () => {
   const [opportunities, setOpportunities] = useState([]);
+  // const [user, setUser] = useState(null);
+  
   useEffect(() => { getOpportunities(); }, []);
   
   const host = 'http://localhost:8080'
-//   const resp = {    "spaceOpps":{
-//     "category": "Soldering",
-//     "title": "Soldering",
-//     "opportunity": "hello hello hello",
-//     "description": "xxxx...",
-//     "priority": "1",
-// }}
 
-  const user = "testUser"
-
+  var user = null;
+  if (firebase.auth().currentUser) {
+    const userData = firebase.auth().currentUser;
+    user = {
+      "uid": userData.uid,
+      "displayName": userData.displayName,
+      "email": userData.email
+    };
+  }
+  
   const getOpportunities = () => {
     console.log('inside getOpportunities');
-
-    fetch(host+'/api/opportunities', {
+    fetch(host+'/api/spaces/' + user.displayName, {
       method: 'GET',
     }).then(
       (res) => {
         if(res.ok){
           res.json().then(data => {
             console.log(data)
-            setOpportunities(data,user);
+            setOpportunities(data.opportunities);
           });
         }else{
           console.log('error in fetching opportunities');
@@ -35,70 +38,75 @@ const Opportunity = () => {
       });
   }
 
-  const creatOpportunity = (event) => {
+  const onLoad = () => {
+    getOpportunities();
+  };
+
+  const createOpportunity = (event) => {
     event.preventDefault();
     console.log("On handle create opportunity");
-    
-    fetch(host+'/api/opportunities/add', {
+    const spaceName = event.target.spaceName.value;
+    fetch(host + '/api/opportunities/space/' + spaceName, {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: 'TestName', //TODO space name
-        category: 'test-category', //event.target.category.value,
-        title: 'test-title', //event.target.title.value,
-        opportunity: 'test-opportunity', //event.target.opportunity.value,
-        description: 'test-description', //event.target.description.value,
-        priority: '1',  //event.target.priority.value,
+        name: spaceName,
+        category: event.target.category.value,
+        title: event.target.title.value,
+        opportunity: event.target.opportunity.value,
+        description: event.target.description.value,
+        priority: event.target.priority.value,
       })
     }).then(
       (res) => {
-        if(res.ok){
-          res.json().then( data => {
+        if (res.ok) {
+          res.json().then(data => {
             console.log(data);
             onLoad();
           });
-        }else{
+        } else {
           console.log('error in fetching opportunities');
           setOpportunities([]);
         }
       }
     );
   }
-  const onLoad = () => {
-    getOpportunities();
-    console.log(opportunities);
-  };
 
-  const items = ()=>{
-    if(opportunities && opportunities.spaceOpps.length > 0)
-    opportunities.spaceOpps.map(item => (
-    <li>
-      <span>{item.category}</span>
-      <span>{item.title}</span>
-      <span>{item.description}</span>
-      <span>{item.priority}</span>
-      <span><button onClick={handleDismiss(item.title)}>Dismiss</button></span>
-    </li>
-  ));
-
-  const handleDismiss = (opportunity) => {
-    fetch(host+'/api/spaces/' +  'test' + '/opportunities/remove/' + opportunity, {
-      method: 'POST',
+  const handleDismiss = (title) => {
+    fetch(host + '/api/spaces/opportunities/'+title, {
+      method: 'DELETE',
       headers: {
         "Content-Type": "application/json",
       },
     }).then(
       (res) => {
-        if(res.ok){
-          res.json().then( data => {
+        if (res.ok) {
+          res.json().then(data => {
             console.log(data);
             onLoad();
           });
         }
       }
     );
+  };
+
+  const items = () => {
+    if (opportunities && opportunities.spaceOpps && opportunities.spaceOpps.length > 0) {
+      return opportunities.spaceOpps.map(item => (
+        <li>
+          <span>{item.spaceName}</span>
+          <span>{item.category}</span>
+          <span>{item.title}</span>
+          <span>{item.description}</span>
+          <span>{item.priority}</span>
+          <span><button onClick={handleDismiss(item.title)}>Dismiss</button></span>
+        </li>
+      ));
+    } else {
+      return <li>No Opportunities</li>
+    }
   };
   
   return (
@@ -107,14 +115,20 @@ const Opportunity = () => {
         <div className="container">
           <h1>List of Opportunities</h1>
           <ul>
-            {items}
+            {items()}
           </ul>
         </div>
       </section>
       <section>
         <div className="container">
           <h2>Create A New Opportunity</h2>
-          <form onSubmit={creatOpportunity}>
+          <form onSubmit={createOpportunity}>
+          <label>
+              Space Name
+              <div className="control">
+              <input type="text" name="spaceName" />
+            </div>
+            </label>
             <label>
               Category
               <div className="control">

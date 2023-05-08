@@ -101,7 +101,7 @@ const Opportunity = () => {
   };
 
   const items = (opportunities) => {
-    if (opportunities[0].length > 0) {
+    if (opportunities[0] && opportunities[0].length > 0) {
       return (
         <div>
           {opportunities[0].map((item) => (

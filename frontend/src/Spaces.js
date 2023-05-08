@@ -3,7 +3,6 @@ import firebase from "firebase/compat/app";
 import "./App.css";
 
 
-
 const Spaces = () => {
 
     const [opportunities, setOpportunities] = useState([]);
@@ -18,7 +17,7 @@ const Spaces = () => {
       };
     };
 
-    // const host = 'http://localhost:8080'
+    const host = 'http://localhost:8080'
 
     const [isImage, setisImage] = useState(false);
     const [spaceIMG, setSpaceIMG] = useState([]);
@@ -27,36 +26,38 @@ const Spaces = () => {
         getSpaceName()
       }, []);
 
-
     const getSpaceName = () => {
-        fetch('/api/spaces/' + user.displayName, {
+        fetch(host+'/api/spaces/' + user.displayName, {
           method: 'GET',
         }).then(
           (res) => {
             if(res.ok){
               res.json().then(data => {
-                var oppor = data.spaces.map(space => space.opportunities);
+                var oppor = data.spaces;
                 console.log('oppor', oppor)
                 setOpportunities(oppor);
-                var img = data.spaces.map(space => space.img);
-                if (img[0] != "" && oppor[0].length > 0) {
-                    setisImage(true);
-                    console.log('fetching image')
-                    fetch('/api/image/' + user.displayName + '/' + oppor[0][0].spaceName, {
-                    method: 'GET',
-                    }).then(
-                    (res) => {
-                        if(res.ok){
-                        res.json().then(data => {
-                            setSpaceIMG(data.image);
-                            console.log(data.image)
-        
+                if (oppor.length > 0) {
+                    var img = oppor[0].img
+                    if (img[0] != "") {
+                        setisImage(true);
+                        console.log('fetching image')
+                        fetch(host+'/api/image/' + user.displayName + '/' + oppor[0].name, {
+                        method: 'GET',
+                        }).then(
+                        (res) => {
+                            if(res.ok){
+                            res.json().then(data => {
+                                setSpaceIMG(data.image);
+                                console.log(data.image)
+            
+                            });
+                            }else{
+                            setSpaceIMG([]);
+                         }
                         });
-                        }else{
-                        setSpaceIMG([]);
-                     }
-                    });
+                    }
                 }
+
               });
             }else{
               console.log('error in fetching opportunities');
@@ -69,13 +70,13 @@ const Spaces = () => {
     
 
       const items = (opportunities, isImage, spaceIMG) => {
-        if (opportunities[0] && opportunities[0].length > 0) {
+        if (opportunities[0] && opportunities.length > 0) {
           return (
             <div>
-              {opportunities[0].map((item) => (
+              {opportunities.map((item) => (
                 <div key = "{item}">
                   <li>
-                    <span><b>SpaceName:</b> {item.spaceName} </span>
+                    <span><b>SpaceName:</b> {item.name} </span>
                     </li>
                     { !isImage && <b>No Images for this Space Yet</b>}
                     {isImage && <img src={spaceIMG} alt="Table" style={{height: 500}} />}
@@ -115,3 +116,4 @@ export default Spaces;
 
 // TODO: get and display images from web with an interactive button. (for makeers day)
 // TODO: get and display images from /backend API with an interactive button. (for startup systems)
+

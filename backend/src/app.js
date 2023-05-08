@@ -323,6 +323,70 @@ app.post("/api/opportunities/add", async (req, res) => {
 
 });
 
+app.put("/api/opportunities/update", async (req, res) => {
+  /**
+   * CS-5356-TODO
+   * Create a new opportunity for a givenn space 
+   *
+   * Using `db`, create a new opportunity and add it 
+   *
+   * Return:
+   * 201 Created - with the opportunity object
+   * 404 Not Found - when there is no space associated
+   *
+   * Only this user should have access
+   * Expects body of type
+   * {
+        "category": "Soldering",
+        "title": "Soldering",
+        "opportunity": "hello hello hello",
+        "description": "xxxx...,
+        "priority": "1",
+    }
+   */
+
+  //console.log("IN Opportunities Add API")
+
+  try {
+
+  const user = req.body.username;
+  const spaceName = req.body.name;
+  
+  // const spaceName = req.body.name
+  //console.log("Space Name: ", spaceName)
+
+  if(!spaceName){
+    res.status(401).send({ message: "Error passing in name" });
+  }
+
+  // Change to the firestore login &
+    // or user req.body andc pass that instead
+  const newOpportunity = await db.updateSpaceOpp(spaceName,
+    {
+      category: req.body.category,
+      title: req.body.title,
+      description: req.body.description,
+      priority:req.body.priority
+    },user)
+
+  console.log("Space opp: ", newOpportunity)
+
+  if(!newOpportunity){
+    res.status(401).send({ message: "Error setting new opportunity" });
+  }
+
+  console.log("Space opp: ", newOpportunity)
+  
+  res.status(201).send(newOpportunity);
+  console.log("Space opp: ", newOpportunity)
+} catch (error) {
+  console.error("Error adding opportunity: ", error);
+  res.status(500).send({ message: "Server error" });
+}
+
+});
+
+
 app.get("/api/spaces/analytics", async (req, res) => {
   
   /**

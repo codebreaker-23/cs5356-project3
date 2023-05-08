@@ -219,6 +219,47 @@ export const createSpaceOpp = async (spaceName, opportunity,spaceUser) => {
       priority: opportunity.priority
     };
 
+    const updatedOpportunities = [...spaceData.opportunities, newOpportunity];
+    console.log("Updated opps: ", updatedOpportunities)
+    
+    //TODO 
+    await spaceDoc.ref.update({ opportunities: updatedOpportunities });
+
+    return newOpportunity;
+  } catch (error) {
+    console.error("Error adding opportunity: ", error);
+    throw error;
+  }
+};
+
+// CS5356 TO-DO #4
+export const updateSpaceOpp = async (spaceName, opportunity,spaceUser) => {
+  //console.log("IN DB")
+  try {
+    let spaceQuery = spacesRef.where('username', '==', spaceUser).where('name', '==', spaceName);
+    const querySnapshot = await spaceQuery.get();
+
+    if (querySnapshot.empty) {
+      throw new Error("No space found with that name");
+    }
+
+    let spaceDoc;
+    querySnapshot.forEach(doc => {
+      spaceDoc = doc;
+    });
+    if (!spaceDoc.exists) {
+      throw new Error("No space found with that name");
+    }
+    const spaceData = spaceDoc.data();
+    console.log("spaceData: ", spaceData)
+    const newOpportunity = {
+      spaceName: spaceName,
+      category: opportunity.category,
+      title: opportunity.title,
+      description: opportunity.description,
+      priority: opportunity.priority
+    };
+
     let updatedOpportunities = []
 
     updatedOpportunities = spaceData.opportunities.filter((opp) => opp.title !== opportunity.title);

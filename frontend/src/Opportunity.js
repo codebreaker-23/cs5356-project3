@@ -73,7 +73,7 @@ const Opportunity = () => {
         }
       }
     );
-  }
+  };
 
   const handleDismiss = (opportunity) => {
     console.log("On handle dismiss opportunity", opportunity);
@@ -100,6 +100,39 @@ const Opportunity = () => {
     );
   };
 
+  const handleUpdate = (event) => {
+    event.preventDefault();
+    console.log("On handle update");
+    const spaceName = event.target.spaceName.value;
+    fetch('/api/opportunities/update', {
+      method: 'PUT',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: user.displayName,
+        name: spaceName,
+        category: event.target.category.value,
+        title: event.target.title.value,
+        opportunity: event.target.opportunity.value,
+        description: event.target.description.value,
+        priority: event.target.priority.value,
+      })
+    }).then(
+      (res) => {
+        if (res.ok) {
+          res.json().then(data => {
+            console.log(data);
+            onLoad();
+          });
+        } else {
+          console.log('error in updating opportunity');
+          setOpportunities([]);
+        }
+      }
+    );
+  };
+
   const items = (opportunities) => {
     if (opportunities[0] && opportunities[0].length > 0) {
       return (
@@ -113,6 +146,29 @@ const Opportunity = () => {
                 <span><b>Description:</b> {item.description} </span>
                 <span><b>Priority:</b> {item.priority} </span>
                 <span><button onClick={() => handleDismiss(item)}>Dismiss</button></span>
+                <span>          <form onSubmit={handleUpdate}>
+                  <input type="hidden" name="spaceName" value={item.spaceName} />
+                  <div className="control">
+                    <input type="hidden" name="title" value={item.title} />
+                  </div>
+                  Category
+                  <div className="control">
+                    <input type="text" name="category" />
+                  </div>
+                  Opportunity
+                  <div className="control">
+                    <input type="text" name="opportunity" />
+                  </div>
+                  Description
+                  <div className="control">
+                    <input type="text" name="description" />
+                  </div>
+                  Priority
+                  <div className="control">
+                    <input type="text" name="priority" />
+                  </div>
+                  <button type="submit">Update</button>
+                </form></span>
               </li>
             </div>
           ))}

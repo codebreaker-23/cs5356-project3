@@ -36,7 +36,7 @@ const Analytics = () => {
                 setOpportunities(oppor);
                 if (oppor.length > 0) {
                     var img = oppor[0].img
-                    if (img[0] != "") {
+                    if (img[0] != null) {
                         setisImage(true);
                         console.log('fetching image')
                         fetch(host+'/api/heatmap/' + user.displayName + '/' + oppor[0].name, {

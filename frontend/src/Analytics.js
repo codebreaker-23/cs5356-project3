@@ -15,7 +15,7 @@ const Analytics = () => {
       };
     };
 
-    const host = 'http://localhost:8080'
+    // const host = 'http://localhost:8080'
 
     const [isImage, setisImage] = useState(false);
     const [spaceIMG, setSpaceIMG] = useState([]);
@@ -25,7 +25,7 @@ const Analytics = () => {
       }, []);
 
     const getSpaceName = () => {
-        fetch(host+'/api/spaces/' + user.displayName, {
+        fetch('/api/spaces/' + user.displayName, {
           method: 'GET',
         }).then(
           (res) => {
@@ -39,7 +39,7 @@ const Analytics = () => {
                     if (img[0] != null) {
                         setisImage(true);
                         console.log('fetching image')
-                        fetch(host+'/api/heatmap/' + user.displayName + '/' + oppor[0].name, {
+                        fetch('/api/heatmap/' + user.displayName + '/' + oppor[0].name, {
                         method: 'GET',
                         }).then(
                         (res) => {

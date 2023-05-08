@@ -370,10 +370,9 @@ app.delete("/api/spaces/opportunities", async (req, res) => {
    * Users should only see their own opportunities and be able to delete them
    */
 
-  const { name, title } = req.body;
-  const user = "testUser"
-
-  const success = await db.dismissOpportunity(name, title,user);
+  const { spaceName, title , userName} = req.body;  
+  // console.log("Params: ", spaceName, title, userName)
+  const success = await db.dismissOpportunity(spaceName, title,userName);
 
   if (success) {
     res.status(200).send({ message: "Opportunity successfully deleted" });

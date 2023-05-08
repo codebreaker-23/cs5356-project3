@@ -177,6 +177,7 @@ export const createSpaceOpp = async (spaceName, opportunity,spaceUser) => {
     const spaceData = spaceDoc.data();
     console.log("spaceData: ", spaceData)
     const newOpportunity = {
+      spaceName: spaceName,
       category: opportunity.category,
       title: opportunity.title,
       description: opportunity.description,

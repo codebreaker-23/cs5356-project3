@@ -18,7 +18,7 @@ const Spaces = () => {
       };
     };
 
-    const host = 'http://localhost:8080'
+    // const host = 'http://localhost:8080'
 
     const [isImage, setisImage] = useState(false);
     const [spaceIMG, setSpaceIMG] = useState([]);
@@ -29,7 +29,7 @@ const Spaces = () => {
 
 
     const getSpaceName = () => {
-        fetch(host+'/api/spaces/' + user.displayName, {
+        fetch('/api/spaces/' + user.displayName, {
           method: 'GET',
         }).then(
           (res) => {
@@ -42,7 +42,7 @@ const Spaces = () => {
                 if (img[0] != "" && oppor[0].length > 0) {
                     setisImage(true);
                     console.log('fetching image')
-                    fetch(host+'/api/image/' + user.displayName + '/' + oppor[0][0].spaceName, {
+                    fetch('/api/image/' + user.displayName + '/' + oppor[0][0].spaceName, {
                     method: 'GET',
                     }).then(
                     (res) => {

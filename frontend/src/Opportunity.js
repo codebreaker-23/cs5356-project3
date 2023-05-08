@@ -7,7 +7,7 @@ const Opportunity = () => {
   
   useEffect(() => { getOpportunities(); }, []);
   
-  const host = 'http://localhost:8080'
+  // const host = 'http://localhost:8080'
 
   var user = null;
   if (firebase.auth().currentUser) {
@@ -21,7 +21,7 @@ const Opportunity = () => {
   
   const getOpportunities = () => {
     console.log('inside getOpportunities');
-    fetch(host+'/api/spaces/' + user.displayName, {
+    fetch('/api/spaces/' + user.displayName, {
       method: 'GET',
     }).then(
       (res) => {
@@ -46,7 +46,7 @@ const Opportunity = () => {
     event.preventDefault();
     console.log("On handle create opportunity");
     const spaceName = event.target.spaceName.value;
-    fetch(host + '/api/opportunities/add', {
+    fetch('/api/opportunities/add', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -78,7 +78,7 @@ const Opportunity = () => {
   const handleDismiss = (opportunity) => {
     console.log("On handle dismiss opportunity", opportunity);
 
-    fetch(host + '/api/spaces/opportunities', {
+    fetch('/api/spaces/opportunities', {
       method: 'DELETE',
       headers: {
         "Content-Type": "application/json",

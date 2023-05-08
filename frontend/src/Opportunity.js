@@ -101,10 +101,10 @@ const Opportunity = () => {
   };
 
   const items = (opportunities) => {
-    if (opportunities.length > 0) {
+    if (opportunities[0].length > 0) {
       return (
         <div>
-          {opportunities.map((item) => (
+          {opportunities[0].map((item) => (
             <div>
               <li>
                 <span><b>SpaceName:</b> {item.spaceName} </span>
@@ -129,7 +129,7 @@ const Opportunity = () => {
         <div className="container">
           <h1>List of Opportunities - </h1>
           <ul>
-            {items(opportunities[0])}
+            {items(opportunities)}
           </ul>
         </div>
       </section>

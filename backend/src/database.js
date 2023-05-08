@@ -218,7 +218,13 @@ export const createSpaceOpp = async (spaceName, opportunity,spaceUser) => {
       description: opportunity.description,
       priority: opportunity.priority
     };
-    const updatedOpportunities = [...spaceData.opportunities, newOpportunity];
+
+    let updatedOpportunities = []
+
+    updatedOpportunities = spaceData.opportunities.filter((opp) => opp.title !== opportunity.title);
+    await spaceDoc.ref.update({ opportunities: updatedOpportunities });
+
+    updatedOpportunities = [...updatedOpportunities, newOpportunity];
     console.log("Updated opps: ", updatedOpportunities)
     
     //TODO 

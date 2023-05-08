@@ -66,6 +66,40 @@ export const getSpaceImage = async (spaceName,spaceUser) => {
   return url;
 };
 
+export const getHeatFileName = async (spaceName,spaceUser) => {
+  try {
+    console.log("getting file name for: ", spaceName)
+    const spaceDoc = await getSpace(spaceName,spaceUser)
+    console.log("img: ", spaceDoc.analytics.heatmap)
+    return spaceDoc.analytics.heatmap
+  } catch (error) {
+    console.error("Error getting analytics: ", error);
+    throw error;
+  }
+};
+
+export const heatmapImage = async (spaceName,spaceUser) => {
+  // Get the image of a given space name
+  let storage = getStorage()
+
+
+  const fileName = await getHeatFileName(spaceName,spaceUser)
+
+  console.log("file name: ", fileName)
+
+  const imagesRef = ref(storage, 'images');
+  const spaceRef = ref(imagesRef, fileName);
+
+  console.log("spaceRef: ", spaceRef)
+
+  // Get the download URL of the image
+  const url = await getDownloadURL(spaceRef);
+
+  console.log("URL: ", url)
+
+  return url;
+};
+
 // CS5356 TO-DO #1.5
 export const setSpaceImage = async (spaceName,spaceImageName,spaceImageFile,spaceUser) => {
   // Get the image of a given space name
@@ -89,7 +123,7 @@ export const createSpace = async (spaceName, spaceStats,spaceUser) => {
     const newSpace = {
       name: spaceName,
       username: spaceUser,
-      img: "img.png",
+      img: "",
       opportunities: [],
       analytics: {
         heatmap: null,

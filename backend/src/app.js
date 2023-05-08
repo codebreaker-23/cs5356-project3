@@ -121,7 +121,7 @@ console.log("IN spaces get API")
 //   }
 // });
 
-app.get("/api/spaces/image", async (req, res) => {
+app.get("/api/image/:userName/:spaceName", async (req, res) => {
   
   /**
    * CS-5356-TODO
@@ -133,11 +133,10 @@ app.get("/api/spaces/image", async (req, res) => {
    * Only this user should have access
    */
   try {
-  const spaceName = req.body.name
+  const spaceName = req.params.spaceName
 
-  const user = "testUser"
-
-  const image = await db.getSpaceImage(spaceName,user)
+  const userName = req.params.userName;
+  const image = await db.getSpaceImage(spaceName,userName)
 
   if (!image){
     res.status(404).send({ message: "No space with this name" });
@@ -150,6 +149,37 @@ app.get("/api/spaces/image", async (req, res) => {
 }
 
 });
+
+app.get("/api/heatmap/:userName/:spaceName", async (req, res) => {
+  
+  /**
+   * CS-5356-TODO
+   * Get a Space Image
+   *
+   * 200 OK - with an object containing the image for that space
+   * 404 Not Found - when there is no class image found
+   *
+   * Only this user should have access
+   */
+  try {
+  const spaceName = req.params.spaceName
+
+  const userName = req.params.userName;
+  const image = await db.heatmapImage(spaceName,userName)
+
+  if (!image){
+    res.status(404).send({ message: "No space with this name" });
+  } 
+  res.status(200).send({image});
+
+} catch (error) {
+  console.error("Error getting image: ", error);
+  res.status(500).send({ message: "Server error" });
+}
+
+});
+
+
 
 app.set("/api/spaces/image", async (req, res) => {
   

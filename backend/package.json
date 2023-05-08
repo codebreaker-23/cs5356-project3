@@ -2,7 +2,7 @@
   "name": "milestone-3-tmp",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index-firebase.js",
   "scripts": {
     "start": "nodemon index.js",
     "lint-report": "eslint --output-file eslint-report.json --format json src/",

@@ -133,7 +133,7 @@ app.get("/api/spaces/image", async (req, res) => {
    * Only this user should have access
    */
   try {
-  const spaceName = 'TestMaker Lab' //req.body.name
+  const spaceName = req.body.name
 
   const user = "testUser"
 

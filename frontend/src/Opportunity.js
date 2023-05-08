@@ -4,7 +4,6 @@ import "./App.css";
 
 const Opportunity = () => {
   const [opportunities, setOpportunities] = useState([]);
-  // const [user, setUser] = useState(null);
   
   useEffect(() => { getOpportunities(); }, []);
   
@@ -28,8 +27,9 @@ const Opportunity = () => {
       (res) => {
         if(res.ok){
           res.json().then(data => {
-            console.log(data)
-            setOpportunities(data.opportunities);
+            var oppor = data.spaces.map(space => space.opportunities);
+            console.log('oppor', oppor);
+            setOpportunities(oppor);
           });
         }else{
           console.log('error in fetching opportunities');
@@ -46,12 +46,13 @@ const Opportunity = () => {
     event.preventDefault();
     console.log("On handle create opportunity");
     const spaceName = event.target.spaceName.value;
-    fetch(host + '/api/opportunities/space/' + spaceName, {
+    fetch(host + '/api/opportunities/add', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        username: user.displayName,
         name: spaceName,
         category: event.target.category.value,
         title: event.target.title.value,
@@ -74,12 +75,19 @@ const Opportunity = () => {
     );
   }
 
-  const handleDismiss = (title) => {
-    fetch(host + '/api/spaces/opportunities/'+title, {
+  const handleDismiss = (opportunity) => {
+    console.log("On handle dismiss opportunity", opportunity);
+
+    fetch(host + '/api/spaces/opportunities', {
       method: 'DELETE',
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        userName: user.displayName,
+        spaceName: opportunity.spaceName,
+        title: opportunity.title
+      })
     }).then(
       (res) => {
         if (res.ok) {
@@ -92,20 +100,26 @@ const Opportunity = () => {
     );
   };
 
-  const items = () => {
-    if (opportunities && opportunities.spaceOpps && opportunities.spaceOpps.length > 0) {
-      return opportunities.spaceOpps.map(item => (
-        <li>
-          <span>{item.spaceName}</span>
-          <span>{item.category}</span>
-          <span>{item.title}</span>
-          <span>{item.description}</span>
-          <span>{item.priority}</span>
-          <span><button onClick={handleDismiss(item.title)}>Dismiss</button></span>
-        </li>
-      ));
+  const items = (opportunities) => {
+    if (opportunities.length > 0) {
+      return (
+        <div>
+          {opportunities.map((item) => (
+            <div>
+              <li>
+                <span><b>SpaceName:</b> {item.spaceName} </span>
+                <span><b>Category:</b> {item.category} </span>
+                <span><b>Title:</b> {item.title} </span>
+                <span><b>Description:</b> {item.description} </span>
+                <span><b>Priority:</b> {item.priority} </span>
+                <span><button onClick={() => handleDismiss(item)}>Dismiss</button></span>
+              </li>
+            </div>
+          ))}
+        </div>
+      );
     } else {
-      return <li>No Opportunities</li>
+      return (<div><li>No Opportunities found. Please ensure a new Space is created.</li></div>);
     }
   };
   
@@ -113,9 +127,9 @@ const Opportunity = () => {
     <>
       <section>
         <div className="container">
-          <h1>List of Opportunities</h1>
+          <h1>List of Opportunities - </h1>
           <ul>
-            {items()}
+            {items(opportunities[0])}
           </ul>
         </div>
       </section>
@@ -123,35 +137,41 @@ const Opportunity = () => {
         <div className="container">
           <h2>Create A New Opportunity</h2>
           <form onSubmit={createOpportunity}>
-          <label>
+            <label>
               Space Name
               <div className="control">
-              <input type="text" name="spaceName" />
-            </div>
+                <input type="text" name="spaceName" />
+              </div>
+            </label>
+            <label>
+              Title
+              <div className="control">
+                <input type="text" name="title" />
+              </div>
             </label>
             <label>
               Category
               <div className="control">
-              <input type="text" name="category" />
-            </div>
+                <input type="text" name="category" />
+              </div>
             </label>
             <label>
               Opportunity
               <div className="control">
-              <input type="text" name="opportunity" />
-            </div>
+                <input type="text" name="opportunity" />
+              </div>
             </label>
             <label>
               Description
               <div className="control">
-              <input type="text" name="description" />
-            </div>
+                <input type="text" name="description" />
+              </div>
             </label>
             <label>
               Priority
               <div className="control">
-              <input type="text" name="priority" />
-            </div>
+                <input type="text" name="priority" />
+              </div>
             </label>
             <button type="submit">Submit</button>
           </form>
